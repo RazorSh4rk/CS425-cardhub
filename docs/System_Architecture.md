@@ -1,10 +1,4 @@
-# CardHub System Architecture
-
-## Overview
-
-This document describes the high-level system architecture for CardHub, a playing card store application. The architecture follows a **3-tier design** that separates the client, application server, and data storage concerns.
-
-## Architecture Diagram
+# Architecture Diagram
 
 ```mermaid
 flowchart TB
