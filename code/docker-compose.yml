@@ -1,0 +1,49 @@
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/test
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+      JWT_SECRET: myDefaultSecretKeyForDevelopmentOnlyDoNotUseInProduction12345
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend-test:
+    image: maven:3.9-eclipse-temurin-17
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+      - maven-cache:/root/.m2
+    command: mvn test
+    profiles:
+      - test
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  maven-cache:
